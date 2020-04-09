@@ -40,8 +40,21 @@ public class Parser {
 
 		//construir os objetos
 		for (int i = 0; i < quantidadeLinhas; i++) {
+			//criar o obj e fazer os nétodos do construtor
 			listaInstrucoes[i] = new LinhaInstrucao(entradaCortada[i], opCodeMap);
-			//System.out.print(listaInstrucoes[i]);
+			/*o asterisco denota uma operação inválida
+			opArduino[0] = Valor de A, em hex
+						[1] = valor de B, em hex
+						[2] = código da operação. Se for inválida é um *
+			* */
+			if (listaInstrucoes[i].opArduino[2] != '*') {
+				char valorA = listaInstrucoes[i].opArduino[0];
+				char valorB = listaInstrucoes[i].opArduino[1];
+				char valorOp = listaInstrucoes[i].opArduino[2];
+
+				System.out.println("Operação arduino: " + valorA + valorB + valorOp);
+				// TODO: chamar a função sys do arduino com os characteres aqui.
+			}
 
 			//a cada 60 i's verificar se tá atribuindo direitinho
 			/*
@@ -50,13 +63,6 @@ public class Parser {
 			}
 
 			 */
-		}
-
-		//pegar a instrução dentro do objeto
-		for (int i = 0; i < quantidadeLinhas; i++) {
-			if (!listaInstrucoes[i].opArduino.equals("")) {
-				System.out.println("Operação arduino: " + listaInstrucoes[i].opArduino);
-			}
 		}
 
 
@@ -137,9 +143,11 @@ class LinhaInstrucao {
 
 	public int op;
 	public String linhaComInstrucao;
-	public String opArduino;
+	public Character[] opArduino;
 
 	LinhaInstrucao(String fraseFiltrar, Map<String, Integer> opCodeMap) {
+		opArduino = new Character[3];
+
 		//converter hex pra dec
 		limparString(fraseFiltrar);
 		//descobrir a op da linha
@@ -183,23 +191,28 @@ class LinhaInstrucao {
 	public void comunicacaoOp() {
 		//se nao tiver uma operacao valida não há o que retornar.
 		if (op == -1) {
-			this.opArduino = "";
+			opArduino[2] = '*';
 		} else {
-			String valorA = Integer.toHexString(LinhaInstrucao.a);
-			String valorB = Integer.toHexString(LinhaInstrucao.b);
-			String valorC = Integer.toHexString(op);
+			Character valorA = Integer.toHexString(LinhaInstrucao.a).charAt(0);
+			Character valorB = Integer.toHexString(LinhaInstrucao.b).charAt(0);
+			Character valorC = Integer.toHexString(op).charAt(0);
 
-			String retorno = valorA.concat(valorB.concat(valorC));
+			System.out.println("----------------");
+			System.out.println("Valor da operação: " + valorC);
+			System.out.println("Valor de A: " + valorA);
+			System.out.println("Valor de B: " + valorB);
 
 
-			this.opArduino = retorno;
+			opArduino[0] = valorA;
+			opArduino[1] = valorB;
+			opArduino[2] = valorC;
 		}
 	}
 
 	/**
 	 * Método to string modificado, para debug do programa.
 	 *
-	 * @return
+	 * @return String a ser printada.
 	 */
 	@Override
 	public String toString() {
