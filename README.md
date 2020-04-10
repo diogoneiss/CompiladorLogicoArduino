@@ -7,6 +7,8 @@ Parser de instrução em pseudo-linguagem lógica e criação de arquivo com ins
 ## Estrutura do projeto 
 * Classe privada de leitura e manipulação da entrada
 * Classe pública com a manipulação das informações
+* Arquivo .c que deve ser compilado dentro do arduino
+* envia.exe, executável que envia as informações para o monitor serial do arduino
 
 ### Autores
 * Diogo Neiss
