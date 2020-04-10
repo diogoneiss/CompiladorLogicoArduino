@@ -1,3 +1,6 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -38,31 +41,35 @@ public class Parser {
 
 		int quantidadeLinhas = entradaCortada.length;
 
-		//construir os objetos
-		for (int i = 0; i < quantidadeLinhas; i++) {
-			//criar o obj e fazer os nétodos do construtor
-			listaInstrucoes[i] = new LinhaInstrucao(entradaCortada[i], opCodeMap);
-			/*o asterisco denota uma operação inválida
-			opArduino[0] = Valor de A, em hex
-						[1] = valor de B, em hex
-						[2] = código da operação. Se for inválida é um *
-			* */
-			if (listaInstrucoes[i].opArduino[2] != '*') {
-				char valorA = listaInstrucoes[i].opArduino[0];
-				char valorB = listaInstrucoes[i].opArduino[1];
-				char valorOp = listaInstrucoes[i].opArduino[2];
+		try {
+			PrintWriter arquivoHex = new PrintWriter(new BufferedWriter(new FileWriter("testeula.hex", true)));
 
-				System.out.println("Operação arduino: " + valorA + valorB + valorOp);
-				// TODO: chamar a função sys do arduino com os characteres aqui.
+			for (int i = 0; i < quantidadeLinhas; i++) {
+				//criar o obj e fazer os nétodos do construtor
+				listaInstrucoes[i] = new LinhaInstrucao(entradaCortada[i], opCodeMap);
+
+				/*o asterisco denota uma operação inválida
+				opArduino[0] = Valor de A, em hex
+				opArduino[1] = valor de B, em hex
+				opArduino[2] = código da operação. Se for inválida é um *
+				*/
+				if (listaInstrucoes[i].opArduino[2] != '*') {
+					char valorA = listaInstrucoes[i].opArduino[0];
+					char valorB = listaInstrucoes[i].opArduino[1];
+					char valorOp = listaInstrucoes[i].opArduino[2];
+
+					System.out.println("Operação arduino: " + valorA + valorB + valorOp);
+					// TODO: chamar a função sys do arduino com os characteres aqui.
+
+					//escrever *A , *B e *Op.
+					arquivoHex.print(valorA);
+					arquivoHex.print(valorB);
+					arquivoHex.println(valorOp);
+				}
 			}
-
-			//a cada 60 i's verificar se tá atribuindo direitinho
-			/*
-			if(i % 60 == 0){
-				System.out.println("Valor de A: "+LinhaInstrucao.a +"\nValor de B: "+LinhaInstrucao.b);
-			}
-
-			 */
+			arquivoHex.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 
