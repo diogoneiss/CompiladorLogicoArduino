@@ -25,26 +25,29 @@ public class Parser {
 
     public static void main(String[] args) {
 
-		Scanner in = new Scanner(System.in);
-		ProcessBuilder pb;
-		Process p;
-		int tempo = 500;
-		String x;
-		Long start_time;
-		Long diff_time;
-		String porta;
+	    Scanner in = new Scanner(System.in);
+	    ProcessBuilder pb;
+	    Process p;
+	    int tempo = 500;
+	    String x;
+	    Long start_time;
+	    Long diff_time;
+	    String porta;
+	    System.out.println("O programa lerá as instruções do arquivo testeula.ula e enviará para envia.exe a instrução pro arduino e, \n" +
+			      "no arquivo testeula.hex, a lista com todas as instruções que foram detectadas ao longo do programa.");
+	    System.out.println("----------------------------------------------------------------------------------------------------------");
 
-		System.out.println("Em qual porta o Arduino está localizado ?");
-		porta = in.nextLine();
+	    System.out.println("Em qual porta o Arduino está localizado?\nDigite no formato \"com4\": ");
+	    porta = in.nextLine();
 
 
-		// hashmap das instruções, com ele vou procurar as coisas
-		Map<String, Integer> opCodeMap = new HashMap<>();
-		// colocar as ops dentro
-		preencherHash(opCodeMap);
+	    // hashmap das instruções, com ele vou procurar as coisas
+	    Map<String, Integer> opCodeMap = new HashMap<>();
+	    // colocar as ops dentro
+	    preencherHash(opCodeMap);
 
-		// leitura do arquivo como uma única linha, que será splitada em múltiplas
-		// instruçoes
+	    // leitura do arquivo como uma única linha, que será splitada em múltiplas
+	    // instruçoes
 		// e limpeza de não instruções
 		String entrada = (readFileAsString("testeula.ula"));
 		entrada = entrada.replace("inicio:", "");
@@ -73,14 +76,14 @@ public class Parser {
 					char valorB = listaInstrucoes[i].opArduino[1];
 					char valorOp = listaInstrucoes[i].opArduino[2];
 
-					System.out.println("Operação arduino: " + valorA + valorB + valorOp);
+					System.out.println("Operação enviada ao arquivo .hex e arduino: " + valorA + valorB + valorOp);
 					// TODO: chamar a função sys do arduino com os characteres aqui.
 					x = "";
 					x += valorA;
 					x += valorB;
 					x += valorOp;
-					
-					pb = new ProcessBuilder("envia.exe", porta, x); 
+
+					pb = new ProcessBuilder("envia.exe", porta, x);
 					p = pb.start();
 					start_time = System.nanoTime();
 					p.waitFor();
@@ -94,16 +97,14 @@ public class Parser {
 			}
 			in.close();
 			arquivoHex.close();
-		}catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	
 
-		
 
-		System.out.println("Fim do programa, é isto.");
+	    System.out.println("Fim do programa, é isto. Valeu e obrigado, Romanelli");
 
-	}
+    }
 
 	/**
 	 * Método para preencher o hashmap com os valores da tabela, em estilo key->value
@@ -153,7 +154,6 @@ public class Parser {
 	/**
 	 * @param fileName nome do arquivo na pasta corrente
 	 * @return linha completa do arquivo
-	 * @author Diogo Neiss
 	 */
 	public static String readFileAsString(String fileName) {
 		String data = "";
@@ -201,7 +201,9 @@ class LinhaInstrucao {
 	public void detectarOp(Map<String, Integer> opCodeMap) {
 		//indica que é uma operação não contada, como atribuição
 		this.op = -1;
+
 		String linha = this.linhaComInstrucao;
+
 		//verificar se é atribuição
 		if (linha.contains("=")) {
 			//separar as partes da atribuição

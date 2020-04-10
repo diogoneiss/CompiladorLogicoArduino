@@ -1,8 +1,18 @@
-//Código Arduino
+// Salvar primeira linha em branco
+String linha = String("");
 
-//Declaracao de funcoes
+// Variáveis da ULA.
+char A, B, OP, SAIDA;
+
+// Mapeamento das portas de saída
+int saida_0 = 13;
+int saida_1 = 12;
+int saida_2 = 11;
+int saida_3 = 10;
+
+
+//Protótipos
 int toInt(char);
-//Declaracao de funcoes com instrucoes
 void zeroL();
 void umL();
 void An();
@@ -20,25 +30,13 @@ void AeBn();
 void AnouBn();
 void AneBn();
 
-// Array de funcoes que chamam funcoes com instrucoes
+// Array de funcoes pra não precisar fazer 500 if-elses
 void (*instrucoes[16])() = {
     zeroL, umL, An, Bn,
     AouB, AeB, AxorB, AnandB,
     AnorB, AxnorB, AnouB, AouBn,
-    AneB, AeBn, AnouBn, AneBn};
-
-// Salvar primeira linha em branco
-String linha = String("");
-
-// Variáveis da ULA.
-// Juntando variaveis no mesmo byte
-char A, B, OP, SAIDA;
-
-// Saida de cada porta do Arduino
-int saida_0 = 13;
-int saida_1 = 12;
-int saida_2 = 11;
-int saida_3 = 10;
+    AneB, AeBn, AnouBn, AneBn
+    };
 
 void setup()
 {
@@ -57,14 +55,8 @@ void loop()
     // Caso haja dados a serem lidos
     if (Serial.available() > 0)
     {
-        //Identificar instrucoes
+        //Ler instrucoes
         linha = Serial.readString();
-
-        // Teste de verificacao
-        /*
-        Serial.print("\nRecebi da porta serial: ");
-        Serial.print(linha);
-        */
 
         // Atribuir valores numericos as variaveis
         A = toInt(linha.charAt(0));
@@ -73,17 +65,8 @@ void loop()
 
         if (Serial.read() == '\n')
         {
-            // Teste de verificacao
-            /*
-            Serial.print("\nA = ");
-            Serial.print((int)A);
-            Serial.print(" B = ");
-            Serial.print((int)B);
-            Serial.print(" OP = ");
-            Serial.print((int)OP);
-            */
 
-            // Chamada de funcao devido ao comando digitado
+            // Chamada da função através de um "hashMap" primitivo
             (*instrucoes[OP])();
 
             // Mostrar LED'S de saida
@@ -92,14 +75,6 @@ void loop()
             digitalWrite(saida_2, SAIDA & 0x2);
             digitalWrite(saida_3, SAIDA & 0x1);
 
-            // Teste Verificacao
-            /*
-            Serial.print("\nSaida (em binário) = ");
-            Serial.print((bool)(SAIDA & 0x8));
-            Serial.print((bool)(SAIDA & 0x4));
-            Serial.print((bool)(SAIDA & 0x2));
-            Serial.print((bool)(SAIDA & 0x1));
-            */
         }
     }
 }
