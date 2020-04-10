@@ -25,7 +25,7 @@ public class Parser {
 
     public static void main(String[] args) {
 
-		Scanner entrada = new Scanner(System.in);
+		Scanner in = new Scanner(System.in);
 		ProcessBuilder pb;
 		Process p;
 		int tempo = 500;
@@ -35,7 +35,7 @@ public class Parser {
 		String porta;
 
 		System.out.println("Em qual porta o Arduino está localizado ?");
-		porta = entrada.nextLine();
+		porta = in.nextLine();
 
 
 		// hashmap das instruções, com ele vou procurar as coisas
@@ -84,7 +84,7 @@ public class Parser {
 					p = pb.start();
 					start_time = System.nanoTime();
 					p.waitFor();
-					di ff_time = (System.nanoTime() - start_time) / 1000000;
+					diff_time = (System.nanoTime() - start_time) / 1000000;
 
 					//escrever *A , *B e *Op.
 					arquivoHex.print(valorA);
@@ -92,8 +92,12 @@ public class Parser {
 					arquivoHex.println(valorOp);
 				}
 			}
+			in.close();
 			arquivoHex.close();
+		}catch(Exception e) {
+			e.printStackTrace();
 		}
+	
 
 		
 
@@ -101,22 +105,28 @@ public class Parser {
 
 	}
 
-    */**
-      * Método para preencher o hashmap com os valores da tabela, em estilo
-      * key->value
-      *
-      * @param opCodeMap hash de string e int
-      */
-    *ivate
-
-    static void pre**
-    Códigos das oper 0 lógic 1
-    lógic A’An 2 B’Bn 3 A+*AouB 4
-    A.B AeB 5 A⊕
-    B AxorB 6(A.B)’
-
-    AnandB  ( A + 
-		 *  )’ Ano ( A ⊕B )’ Axno A’ + B AnouB A + B’ AouBn B A’. B AneB C A . B ‘ AeBn D
+	/**
+	 * Método para preencher o hashmap com os valores da tabela, em estilo key->value
+	 *
+	 * @param opCodeMap hash de string e int
+	 */
+	private static void preencherHash(Map<String, Integer> opCodeMap) {
+		/*
+			Códigos das operações
+			0 lógico zeroL 0
+			1 lógico umL 1
+			A’ An 2
+			B’ Bn 3
+			A + B AouB 4
+			A . B AeB 5
+			A ⊕B AxorB 6
+			( A . B )’ AnandB 7
+			( A + B )’ AnorB 8
+			( A ⊕B )’ AxnorB 9
+			A’ + B AnouB A
+			A + B’ AouBn B
+			A’. B AneB C
+			A . B ‘ AeBn D
 			A’ + B’ AnouBn E
 			A’ . B’ F
 		 */
@@ -140,7 +150,7 @@ public class Parser {
 
 	}
 
-    /**
+	/**
 	 * @param fileName nome do arquivo na pasta corrente
 	 * @return linha completa do arquivo
 	 * @author Diogo Neiss
@@ -158,62 +168,61 @@ public class Parser {
 
 }
 
-*
-
 /**
- * Classe que conterá o valor estático atual de a, b e a operação contida na
- * linha.
+ * Classe que conterá o valor estático atual de a, b e a operação contida na linha.
  */
 class LinhaInstrucao {
-    public static int a = 0;
-    public static int b = 0;
+	public static int a = 0;
+	public static int b = 0;
 
-    public int op;
-    public String linhaComInstrucao;
-    public Character[] opArduino;
+	public int op;
+	public String linhaComInstrucao;
+	public Character[] opArduino;
 
-    LinhaInstrucao(String fraseFiltrar, Map<String, Integer> opCodeMap) {
-        op Arduino = new Character[3];
+	LinhaInstrucao(String fraseFiltrar, Map<String, Integer> opCodeMap) {
+		opArduino = new Character[3];
 
-        // converter hex pra dec
-        limparString(fraseFiltrar);
-        // descobrir a op da linha
-        //
-        detectarOp(opCodeMap);
-        // salvar numa string o codigo a ser transmitido da linha ou, se for uma
-        // atribuição, apenas "".
-        comunicacaoOp();
-    }
+		//converter hex pra dec
+		limparString(fraseFiltrar);
+		//descobrir a op da linha
+		detectarOp(opCodeMap);
+		//salvar numa string o codigo a ser transmitido da linha ou, se for uma atribuição, apenas "".
+		comunicacaoOp();
+	}
 
-    private static void atribuirA(int valor) {
-        a = valor;
-    }
+	private static void atribuirA(int valor) {
+		a = valor;
+	}
 
-    private static void atribuirB(int valor) {
-        b = valor;
-    }
+	private static void atribuirB(int valor) {
+		b = valor;
+	}
 
-    public void detectarOp(Map<String, Integer> opCodeMap) {
+	public void detectarOp(Map<String, Integer> opCodeMap) {
 		//indica que é uma operação não contada, como atribuição
-		th is.op = -1;
+		this.op = -1;
 		String linha = this.linhaComInstrucao;
-		//v erificar se é atribuição
+		//verificar se é atribuição
 		if (linha.contains("=")) {
 			//separar as partes da atribuição
 			String[] corte = linha.split("=");
- 
+
 			if (corte[0].charAt(0) == 'A') {
 				//atribuir a a o valor a direita do =
 				atribuirA(Integer.parseInt(corte[1]));
 			} else
-				 atribuirB(Integer.parseInt(corte[1]));
+				atribuirB(Integer.parseInt(corte[1]));
 		}
-		//n ão é uma op de atribuição
+		//não é uma op de atribuição
 		else {
 			//procurar a key e retornar o valor
 			if (opCodeMap.containsKey(linha.trim()))
+				this.op = opCodeMap.get(linha.trim());
+		}
+	}
 
-    public void comunicacaoOp() {
+
+	public void comunicacaoOp() {
 		//se nao tiver uma operacao valida não há o que retornar.
 		if (op == -1) {
 			opArduino[2] = '*';
@@ -223,9 +232,10 @@ class LinhaInstrucao {
 			Character valorC = Integer.toHexString(op).charAt(0);
 
 			System.out.println("----------------");
-			System.out.println("Valor da operação: " + v
+			System.out.println("Valor da operação: " + valorC);
+			System.out.println("Valor de A: " + valorA);
+			System.out.println("Valor de B: " + valorB);
 
-			
 
 			opArduino[0] = valorA;
 			opArduino[1] = valorB;
@@ -233,48 +243,48 @@ class LinhaInstrucao {
 		}
 	}
 
-    /**
-     * Método to string modificado, para debug do programa.
-     *
-     * @return String a ser printada.
-     */
-    @Override
-    public String toString() {
-        if (this.op != -1) {
-            String resp = linhaComInstrucao;
-            resp = resp.concat("\t Operação: " + this.op + "\n");
+	/**
+	 * Método to string modificado, para debug do programa.
+	 *
+	 * @return String a ser printada.
+	 */
+	@Override
+	public String toString() {
+		if (this.op != -1) {
+			String resp = linhaComInstrucao;
+			resp = resp.concat("\t Operação: " + this.op + "\n");
 
-            return resp;
-        } else
-            return "";
+			return resp;
+		} else
+			return "";
 
-    }
+	}
 
-    /**
-     * Converter a string splitada em uma string com valores decimais e retirar \n
-     *
-     * @param frasefiltrar frase a ser filtrada
-     */
-    private void limparString(String frasefiltrar) {
-        if ((!frasefiltrar.equals(" ")) && (!frasefiltrar.equals(""))) {
+	/**
+	 * Converter a string splitada em uma string com valores decimais e retirar \n
+	 *
+	 * @param frasefiltrar frase a ser filtrada
+	 */
+	private void limparString(String frasefiltrar) {
+		if ((!frasefiltrar.equals(" ")) && (!frasefiltrar.equals(""))) {
 
-            if (frasefiltrar.contains("=A"))
-                frasefiltrar = frasefiltrar.replace("=A", "=10");
-            else if (frasefiltrar.contains("=B"))
-                frasefiltrar = frasefiltrar.replace("=B", "=11");
-            else if (frasefiltrar.contains("=C"))
-                frasefiltrar = frasefiltrar.replace("=C", "=12");
-            else if (frasefiltrar.contains("=D"))
-                frasefiltrar = frasefiltrar.replace("=D", "=13");
-            else if (frasefiltrar.contains("=E"))
-                frasefiltrar = frasefiltrar.replace("=E", "=14");
-            else if (frasefiltrar.contains("=F"))
-                frasefiltrar = frasefiltrar.replace("=F", "=15");
+			if (frasefiltrar.contains("=A"))
+				frasefiltrar = frasefiltrar.replace("=A", "=10");
+			else if (frasefiltrar.contains("=B"))
+				frasefiltrar = frasefiltrar.replace("=B", "=11");
+			else if (frasefiltrar.contains("=C"))
+				frasefiltrar = frasefiltrar.replace("=C", "=12");
+			else if (frasefiltrar.contains("=D"))
+				frasefiltrar = frasefiltrar.replace("=D", "=13");
+			else if (frasefiltrar.contains("=E"))
+				frasefiltrar = frasefiltrar.replace("=E", "=14");
+			else if (frasefiltrar.contains("=F"))
+				frasefiltrar = frasefiltrar.replace("=F", "=15");
 
-            if (frasefiltrar.contains("\n"))
-                frasefiltrar = frasefiltrar.replace("\n", "");
+			if (frasefiltrar.contains("\n"))
+				frasefiltrar = frasefiltrar.replace("\n", "");
 
-            this.linhaComInstrucao = frasefiltrar;
-        }
-    }
+			this.linhaComInstrucao = frasefiltrar;
+		}
+	}
 }
